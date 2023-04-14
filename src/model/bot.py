@@ -596,3 +596,55 @@ class Bot(ABC):
             self.mouse.click()
         else:
             self.log_msg("Run is already off.")
+            
+    def click_dungeon_icon(self):
+        return self.click_mini_map_icon("Dungeon_icon")
+
+    def click_make_party_button(self):
+        return self.click_game_view_icon("Make_Party")
+    
+    def find_make_party_button(self):
+        return self.click_mini_map_icon("Make_Party", click = False)
+    
+    def click_mini_map_icon(self, image_name: str, click = True):
+        if icon_location := imsearch.search_img_in_rect(imsearch.SCRAPER_IMAGES.joinpath(f"{image_name}.png"), self.win.minimap, 0.323):
+            if click:
+                self.log_msg(f"Clicking {image_name}...") 
+                self.mouse.move_to(icon_location.random_point())
+                self.mouse.click()
+            return True
+        else:
+            return False
+        
+    def click_game_view_icon(self, image_name: str):
+        self.log_msg(f"Clicking {image_name}...")
+        if icon_location := imsearch.search_img_in_rect(imsearch.SCRAPER_IMAGES.joinpath(f"{image_name}.png"), self.win.game_view, 0.323):
+            self.mouse.move_to(icon_location.random_point(), mouseSpeed = "fast")
+            self.mouse.click()
+            return True
+        else:
+            return False  
+    
+    def gameview_text_orange(self, contains: str = None) -> Union[bool, str]:
+        if contains is None:
+            return ocr.extract_text(self.win.game_view, ocr.PLAIN_12, [ clr.ORANGE, clr.OFF_ORANGE ])
+        if ocr.find_text(contains, self.win.game_view, ocr.PLAIN_12, [ clr.ORANGE, clr.OFF_ORANGE ]):
+            return True
+        
+    def get_raid_layout(self):
+        fonts = [ocr.PLAIN_11, ocr.PLAIN_12, ocr.BOLD_12]
+        for font in fonts:
+            text = ocr.extract_text(self.win.game_view, font, [ clr.WHITE, clr.OFF_WHITE ])
+            if text.count("Puzzle") > 0:
+                return text
+        
+    def gameview_runelite_text_white(self, contains: str = None) -> Union[bool, str]:
+        if contains is None:
+            return ocr.extract_text(self.win.game_view, ocr.PLAIN_12, [ clr.WHITE, clr.OFF_WHITE ])
+        if ocr.find_text(contains, self.win.game_view, ocr.PLAIN_12, [ clr.WHITE, clr.OFF_WHITE ]):
+            return True
+    
+    def keypress(self, direction, duration):
+        pag.keyDown(direction)
+        time.sleep(duration)
+        pag.keyUp(direction)
