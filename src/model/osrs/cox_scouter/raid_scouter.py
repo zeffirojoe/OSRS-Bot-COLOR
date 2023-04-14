@@ -99,7 +99,7 @@ class OSRSCoxScouter(OSRSBot):
                     self.scouting_status = scouting_status.ENTER_RAID
                     
                 case scouting_status.ENTER_RAID:
-                    self.log_msg("Looking for dungeion icon")
+                    self.log_msg("Looking for dungeon icon")
                     while not self.click_dungeon_icon(): 
                         time.sleep(.1)                    
                     time.sleep(.25)
@@ -147,10 +147,6 @@ class OSRSCoxScouter(OSRSBot):
                     self.log_msg("Failed. Need to restart")
                     self.stop()
                     
-
-        self.update_progress(1)
-        self.log_msg("Finished.")
-        self.stop()
         
     def __move_mouse_to_nearest_tagged(self, next_nearest=False):
         options = self.get_all_tagged_in_rect(self.win.game_view, clr.PINK)
