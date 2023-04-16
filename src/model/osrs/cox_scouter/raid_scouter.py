@@ -9,7 +9,6 @@ from utilities.api.status_socket import StatusSocket
 from model.osrs.cox_scouter.scouting_status import scouting_status
 from model.osrs.cox_scouter.raid_rooms import raid_room
 from utilities.geometry import RuneLiteObject
-import re
 
 
 class OSRSCoxScouter(OSRSBot):

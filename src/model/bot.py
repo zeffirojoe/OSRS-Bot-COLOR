@@ -607,7 +607,7 @@ class Bot(ABC):
         return self.click_mini_map_icon("Make_Party", click = False)
     
     def click_mini_map_icon(self, image_name: str, click = True):
-        if icon_location := imsearch.search_img_in_rect(imsearch.SCRAPER_IMAGES.joinpath(f"{image_name}.png"), self.win.minimap, 0.323):
+        if icon_location := imsearch.search_img_in_rect(imsearch.COX_SCOUTER_IMAGES.joinpath(f"{image_name}.png"), self.win.minimap, 0.323):
             if click:
                 self.log_msg(f"Clicking {image_name}...") 
                 self.mouse.move_to(icon_location.random_point())
@@ -618,7 +618,7 @@ class Bot(ABC):
         
     def click_game_view_icon(self, image_name: str):
         self.log_msg(f"Clicking {image_name}...")
-        if icon_location := imsearch.search_img_in_rect(imsearch.SCRAPER_IMAGES.joinpath(f"{image_name}.png"), self.win.game_view, 0.323):
+        if icon_location := imsearch.search_img_in_rect(imsearch.COX_SCOUTER_IMAGES.joinpath(f"{image_name}.png"), self.win.game_view, 0.323):
             self.mouse.move_to(icon_location.random_point(), mouseSpeed = "fast")
             self.mouse.click()
             return True
