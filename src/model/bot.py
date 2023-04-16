@@ -597,17 +597,30 @@ class Bot(ABC):
         else:
             self.log_msg("Run is already off.")
             
+    def click_poll_booth_icon(self):
+        return self.click_mini_map_icon("Poll_booth_icon", imsearch.AMETHYST_SCOUTER_IMAGES)
+            
     def click_dungeon_icon(self):
-        return self.click_mini_map_icon("Dungeon_icon")
+        return self.click_mini_map_icon("Dungeon_icon", imsearch.COX_SCOUTER_IMAGES)
 
     def click_make_party_button(self):
-        return self.click_game_view_icon("Make_Party")
+        return self.click_game_view_icon("Make_Party", imsearch.COX_SCOUTER_IMAGES)
     
     def find_make_party_button(self):
-        return self.click_mini_map_icon("Make_Party", click = False)
+        return self.click_mini_map_icon("Make_Party", imsearch.COX_SCOUTER_IMAGES, click = False)
+        
+    def click_inventory_icon(self, image_name: str, path: str, click = True):
+        if icon_location := imsearch.search_img_in_rect(path.joinpath(f"{image_name}.png"), self.win.inventory_slots, 0.323):
+            if click:
+                self.log_msg(f"Clicking {image_name}...") 
+                self.mouse.move_to(icon_location.random_point())
+                self.mouse.click()
+            return True
+        else:
+            return False
     
-    def click_mini_map_icon(self, image_name: str, click = True):
-        if icon_location := imsearch.search_img_in_rect(imsearch.COX_SCOUTER_IMAGES.joinpath(f"{image_name}.png"), self.win.minimap, 0.323):
+    def click_mini_map_icon(self, image_name: str, path: str, click = True):
+        if icon_location := imsearch.search_img_in_rect(path.joinpath(f"{image_name}.png"), self.win.minimap, 0.323):
             if click:
                 self.log_msg(f"Clicking {image_name}...") 
                 self.mouse.move_to(icon_location.random_point())
@@ -616,9 +629,9 @@ class Bot(ABC):
         else:
             return False
         
-    def click_game_view_icon(self, image_name: str):
+    def click_game_view_icon(self, image_name: str, path: str):
         self.log_msg(f"Clicking {image_name}...")
-        if icon_location := imsearch.search_img_in_rect(imsearch.COX_SCOUTER_IMAGES.joinpath(f"{image_name}.png"), self.win.game_view, 0.323):
+        if icon_location := imsearch.search_img_in_rect(path.joinpath(f"{image_name}.png"), self.win.game_view, 0.323):
             self.mouse.move_to(icon_location.random_point(), mouseSpeed = "fast")
             self.mouse.click()
             return True

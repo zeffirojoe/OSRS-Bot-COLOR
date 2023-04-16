@@ -11,6 +11,7 @@ IMAGES = __PATH.joinpath("images")
 BOT_IMAGES = IMAGES.joinpath("bot")
 SCRAPER_IMAGES = BOT_IMAGES.joinpath("scraper")
 COX_SCOUTER_IMAGES = BOT_IMAGES.joinpath("cox_scouter")
+AMETHYST_SCOUTER_IMAGES = BOT_IMAGES.joinpath("amethyst")
 
 
 def __imagesearcharea(template: Union[cv2.Mat, str, Path], im: cv2.Mat, confidence: float) -> Rectangle:
