@@ -19,6 +19,7 @@ class OSRSCoxScouter(OSRSBot):
         self.allow_six = False
         self.lf_rope = False
         self.lf_crabs = False
+        self.lf_crabs_or_rope = False
         self.tek_muta = False
         self.v_t_v = False
         self.send_layout = False
@@ -28,6 +29,7 @@ class OSRSCoxScouter(OSRSBot):
         self.options_builder.add_checkbox_option("allow_six", "Allow 6", [" "])
         self.options_builder.add_checkbox_option("lf_rope", "Looking for Rope", [" "])
         self.options_builder.add_checkbox_option("lf_crabs", "Looking for Crabs", [" "])
+        self.options_builder.add_checkbox_option("lf_crabs_or_rope", "Looking for Crabs or Rope", [" "])
         self.options_builder.add_checkbox_option("tek_muta", "Tek Muta", [" "])
         self.options_builder.add_checkbox_option("v_t_v", "Send !Layout", [" "])
         self.options_builder.add_checkbox_option("send_layout", "VTV", [" "])
@@ -40,6 +42,8 @@ class OSRSCoxScouter(OSRSBot):
                 self.lf_rope = options[option] != []
             elif option == "lf_crabs":
                 self.lf_crabs = options[option] != []
+            elif option == "lf_crabs_or_rope":
+                self.lf_crabs_or_rope = options[option] != []
             elif option == "tek_muta":
                 self.tek_muta = options[option] != []
             elif option == "v_t_v":
@@ -57,6 +61,8 @@ class OSRSCoxScouter(OSRSBot):
             self.log_msg(f"lf_rope = {self.allow_six}")
         if self.lf_crabs:
             self.log_msg(f"lf_crabs = {self.lf_crabs}")
+        if self.lf_crabs_or_rope:
+            self.log_msg(f"lf_crabs_or_rope = {self.lf_crabs_or_rope}")
         if self.tek_muta:
             self.log_msg(f"tek_muta = {self.tek_muta}")
         if self.v_t_v:
@@ -138,7 +144,7 @@ class OSRSCoxScouter(OSRSBot):
                 case scouting_status.RESTART:
                     self.__move_mouse_to_nearest_tagged()
                     self.mouse.click()
-                    time.sleep(random.uniform(.50, .75))
+                    time.sleep(random.uniform(.75, .90))
                     self.keypress("1", .43)
                     self.log_msg("waiting to leave raid")
                     while self.gameview_runelite_text_white("Puzzle"):
@@ -176,9 +182,11 @@ class OSRSCoxScouter(OSRSBot):
     def check_raid_layout(self, layout: list):
         if layout.count(raid_room.VANGUARDS.value) > 0:
             return False
-        if layout.count(raid_room.CRABS.value) <= 0 and self.lf_crabs:
+        if layout.count(raid_room.CRABS.value) <= 0 and self.lf_crabs and not self.lf_crabs_or_rope:
             return False
-        if layout.count(raid_room.TIGHTROPE.value) <= 0 and self.lf_rope:
+        if layout.count(raid_room.TIGHTROPE.value) <= 0 and self.lf_rope and not self.lf_crabs_or_rope:
+            return False
+        if self.lf_crabs_or_rope and layout.count(raid_room.TIGHTROPE.value) <= 0 and layout.count(raid_room.CRABS.value) <= 0:
             return False
         if len(layout) > 5 and not self.allow_six:
             return False
