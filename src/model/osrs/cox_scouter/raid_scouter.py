@@ -93,7 +93,7 @@ class OSRSCoxScouter(OSRSBot):
                     while self.gameview_runelite_text_white("Puzzle") or self.gameview_runelite_text_white("Combat"): continue
                     self.__move_mouse_to_nearest_tagged()
                     self.mouse.click()
-                    time.sleep(.5)
+                    time.sleep(random.uniform(.5, .65))
                     self.scouting_status = scouting_status.MAKING_PARTY
                     
                 case scouting_status.MAKING_PARTY:
@@ -109,7 +109,7 @@ class OSRSCoxScouter(OSRSBot):
                     self.log_msg("Looking for dungeon icon")
                     while not self.click_dungeon_icon(): 
                         time.sleep(.1)                    
-                    time.sleep(.25)
+                    time.sleep(random.uniform(.25, .33))
                     self.mouse.move_to(self.win.chat.random_point())
                     self.log_msg("Waiting for idle")
                     while not api_m.get_is_player_idle():
@@ -122,7 +122,7 @@ class OSRSCoxScouter(OSRSBot):
                     self.log_msg("Waiting for layout info")
                     while not self.gameview_runelite_text_white("Puzzle"):
                         time.sleep(.1)
-                    time.sleep(1) #Just waiting in case of rendering problem
+                    time.sleep(random.uniform(.9, 1.3)) #Just waiting in case of rendering problem
                     raid_layout = api_m.get_latest_chat_message()
                     raid_layout = raid_layout[raid_layout.find("]") + 2:].split(',')
                     raid_layout = [room.strip() for room in raid_layout]
@@ -139,12 +139,12 @@ class OSRSCoxScouter(OSRSBot):
                 case scouting_status.RESTART:
                     self.__move_mouse_to_nearest_tagged()
                     self.mouse.click()
-                    time.sleep(.63)
+                    time.sleep(random.uniform(.50, .75))
                     self.keypress("1", .43)
                     self.log_msg("waiting to leave raid")
                     while self.gameview_runelite_text_white("Puzzle"):
                         time.sleep(.1)
-                    time.sleep(1.23)
+                    time.sleep(random.uniform(1.15, 1.35))
                     self.scouting_status = scouting_status.CLICKING_BOARD
                     
                 case scouting_status.DONE:
