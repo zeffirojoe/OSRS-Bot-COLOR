@@ -2,14 +2,14 @@ import time
 
 import utilities.api.item_ids as ids
 import utilities.color as clr
-import utilities.random_util as rd
 from model.osrs.osrs_bot import OSRSBot
 from utilities.api.morg_http_client import MorgHTTPSocket
 from utilities.api.status_socket import StatusSocket
 from model.osrs.amethyst.mining_status import mining_status
 from utilities.geometry import RuneLiteObject
-import pyautogui as pag
 import random
+from model.bot import BotStatus
+
 
 
 class OSRSAmethystMiner(OSRSBot):
@@ -56,7 +56,7 @@ class OSRSAmethystMiner(OSRSBot):
         self.mining_status = mining_status.IDLE
 
         # Main loop
-        while True:
+        while self.status != BotStatus.STOPPED:
             # -- Perform bot actions here --
             # Code within this block will LOOP until the bot is stopped.
 
@@ -118,6 +118,9 @@ class OSRSAmethystMiner(OSRSBot):
                     self.__move_mouse_to_nearest_tagged(color=clr.GREEN)
                     self.mouse.click()
                     self.mining_status = mining_status.IDLE
+        
+        self.update_progress(1)
+        self.__logout("Finished.")
 
             
     def __move_mouse_to_nearest_tagged(self, next_nearest=False, color=clr.PINK):
