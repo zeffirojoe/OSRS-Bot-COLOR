@@ -10,7 +10,7 @@ __PATH = Path(__file__).parent.parent
 IMAGES = __PATH.joinpath("images")
 BOT_IMAGES = IMAGES.joinpath("bot")
 SCRAPER_IMAGES = BOT_IMAGES.joinpath("scraper")
-COX_SCOUTER_IMAGES = BOT_IMAGES.joinpath("cox_scouter")
+COX_SCOUTER_IMAGES = BOT_IMAGES.joinpath("raid_scouter")
 AMETHYST_SCOUTER_IMAGES = BOT_IMAGES.joinpath("amethyst")
 
 
