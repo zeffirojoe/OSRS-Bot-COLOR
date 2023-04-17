@@ -21,6 +21,7 @@ class OSRSCoxScouter(OSRSBot):
         self.lf_crabs = False
         self.tek_muta = False
         self.v_t_v = False
+        self.send_layout = False
         self.scouting_status = scouting_status.CLICKING_BOARD
 
     def create_options(self):
@@ -28,7 +29,8 @@ class OSRSCoxScouter(OSRSBot):
         self.options_builder.add_checkbox_option("lf_rope", "Looking for Rope", [" "])
         self.options_builder.add_checkbox_option("lf_crabs", "Looking for Crabs", [" "])
         self.options_builder.add_checkbox_option("tek_muta", "Tek Muta", [" "])
-        self.options_builder.add_checkbox_option("v_t_v", "VTV", [" "])
+        self.options_builder.add_checkbox_option("v_t_v", "Send !Layout", [" "])
+        self.options_builder.add_checkbox_option("send_layout", "VTV", [" "])
 
     def save_options(self, options: dict):
         for option in options:
@@ -40,6 +42,8 @@ class OSRSCoxScouter(OSRSBot):
                 self.lf_crabs = options[option] != []
             elif option == "tek_muta":
                 self.tek_muta = options[option] != []
+            elif option == "send_layout":
+                self.send_layout = options[option] != []
             elif option == "v_t_v":
                 self.v_t_v = options[option] != []
             else:
@@ -57,6 +61,8 @@ class OSRSCoxScouter(OSRSBot):
             self.log_msg(f"tek_muta = {self.tek_muta}")
         if self.v_t_v:
             self.log_msg(f"v_t_v = {self.v_t_v}")
+        if self.send_layout:
+            self.log_msg(f"send_layout = {self.send_layout}")
         self.log_msg("Options set successfully.")
         self.options_set = True
         
@@ -122,6 +128,8 @@ class OSRSCoxScouter(OSRSBot):
                     if self.check_raid_layout(raid_layout):
                         self.log_msg("Approved Raid")
                         self.scouting_status = scouting_status.DONE
+                        if self.send_layout:
+                            self.type_layout()
                     else:
                         self.log_msg("Bad Raid, restarting...")
                         self.scouting_status = scouting_status.RESTART

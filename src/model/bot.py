@@ -27,6 +27,7 @@ from utilities.geometry import Point, Rectangle
 from utilities.mouse import Mouse
 from utilities.options_builder import OptionsBuilder
 from utilities.window import Window, WindowInitializationError
+import random
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -656,6 +657,13 @@ class Bot(ABC):
             return ocr.extract_text(self.win.game_view, ocr.PLAIN_12, [ clr.WHITE, clr.OFF_WHITE ])
         if ocr.find_text(contains, self.win.game_view, ocr.PLAIN_12, [ clr.WHITE, clr.OFF_WHITE ]):
             return True
+    
+    def type_layout(self):
+        msg = "!layout"
+        for key in msg:
+            self.keypress(key, random.uniform(.1, .2))
+        self.keypress("enter", random.uniform(.1, .2))
+            
     
     def keypress(self, direction, duration):
         pag.keyDown(direction)
