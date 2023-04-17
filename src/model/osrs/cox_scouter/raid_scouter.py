@@ -161,6 +161,9 @@ class OSRSCoxScouter(OSRSBot):
                     self.update_progress(1)
                     self.log_msg("Failed. Need to restart")
                     self.stop()
+        
+        self.update_progress(1)
+        self.__logout("Finished.")
                     
         
     def __move_mouse_to_nearest_tagged(self, next_nearest=False):
