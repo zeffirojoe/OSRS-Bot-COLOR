@@ -9,6 +9,7 @@ from utilities.api.status_socket import StatusSocket
 from model.osrs.cox_scouter.scouting_status import scouting_status
 from model.osrs.cox_scouter.raid_rooms import raid_room
 from utilities.geometry import RuneLiteObject
+import random
 
 
 class OSRSCoxScouter(OSRSBot):
@@ -42,10 +43,10 @@ class OSRSCoxScouter(OSRSBot):
                 self.lf_crabs = options[option] != []
             elif option == "tek_muta":
                 self.tek_muta = options[option] != []
-            elif option == "send_layout":
-                self.send_layout = options[option] != []
             elif option == "v_t_v":
                 self.v_t_v = options[option] != []
+            elif option == "send_layout":
+                self.send_layout = options[option] != []
             else:
                 self.log_msg(f"Unknown option: {option}")
                 print("Developer: ensure that the option keys are correct, and that options are being unpacked correctly.")
@@ -76,6 +77,7 @@ class OSRSCoxScouter(OSRSBot):
         self.toggle_run(True)
         self.set_compass_north()
         self.scouting_status = scouting_status.CLICKING_BOARD
+        lastimeclicked = time.time()
 
         # Main loop
         while True:
@@ -146,9 +148,10 @@ class OSRSCoxScouter(OSRSBot):
                     self.scouting_status = scouting_status.CLICKING_BOARD
                     
                 case scouting_status.DONE:
-                    time.sleep(60)
-                    self.mouse.move_to(self.win.chat.random_point())
-                    self.mouse.click()
+                    if time.time() - lastimeclicked > random.randint(100, 150):
+                        self.mouse.move_to(self.win.chat.random_point())
+                        self.mouse.click()
+                        lastimeclicked = time.time()
                 case _:
                     self.update_progress(1)
                     self.log_msg("Failed. Need to restart")
