@@ -1,8 +1,6 @@
 import time
 
-import utilities.api.item_ids as ids
 import utilities.color as clr
-import utilities.random_util as rd
 from model.osrs.osrs_bot import OSRSBot
 from utilities.api.morg_http_client import MorgHTTPSocket
 from utilities.api.status_socket import StatusSocket
@@ -10,6 +8,7 @@ from model.osrs.cox_scouter.scouting_status import scouting_status
 from model.osrs.cox_scouter.raid_rooms import raid_room
 from utilities.geometry import RuneLiteObject
 import random
+from model.bot import BotStatus
 
 
 class OSRSCoxScouter(OSRSBot):
@@ -80,7 +79,7 @@ class OSRSCoxScouter(OSRSBot):
         lastimeclicked = time.time()
 
         # Main loop
-        while True:
+        while self.status != BotStatus.STOPPED:
             # -- Perform bot actions here --
             # Code within this block will LOOP until the bot is stopped.
 
