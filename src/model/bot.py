@@ -4,6 +4,7 @@ pre-implemented and can be used by subclasses, or called by the controller. Code
 """
 import ctypes
 import platform
+import random
 import re
 import threading
 import time
@@ -23,11 +24,10 @@ import utilities.debug as debug
 import utilities.imagesearch as imsearch
 import utilities.ocr as ocr
 import utilities.random_util as rd
-from utilities.geometry import Point, Rectangle
+from utilities.geometry import Point, Rectangle, RuneLiteObject
 from utilities.mouse import Mouse
 from utilities.options_builder import OptionsBuilder
 from utilities.window import Window, WindowInitializationError
-import random
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -597,74 +597,94 @@ class Bot(ABC):
             self.mouse.click()
         else:
             self.log_msg("Run is already off.")
-            
+
     def click_poll_booth_icon(self):
         return self.click_mini_map_icon("Poll_booth_icon", imsearch.AMETHYST_SCOUTER_IMAGES)
-            
+
     def click_dungeon_icon(self):
         return self.click_mini_map_icon("Dungeon_icon", imsearch.COX_SCOUTER_IMAGES)
 
     def click_make_party_button(self):
         return self.click_game_view_icon("Make_Party", imsearch.COX_SCOUTER_IMAGES)
-    
+
     def find_make_party_button(self):
-        return self.click_mini_map_icon("Make_Party", imsearch.COX_SCOUTER_IMAGES, click = False)
-        
-    def click_inventory_icon(self, image_name: str, path: str, click = True):
+        return self.click_mini_map_icon("Make_Party", imsearch.COX_SCOUTER_IMAGES, click=False)
+
+    def click_inventory_icon(self, image_name: str, path: str, click=True):
         if icon_location := imsearch.search_img_in_rect(path.joinpath(f"{image_name}.png"), self.win.inventory_slots, 0.323):
             if click:
-                self.log_msg(f"Clicking {image_name}...") 
+                self.log_msg(f"Clicking {image_name}...")
                 self.mouse.move_to(icon_location.random_point())
                 self.mouse.click()
             return True
         else:
             return False
-    
-    def click_mini_map_icon(self, image_name: str, path: str, click = True):
+
+    def click_mini_map_icon(self, image_name: str, path: str, click=True):
         if icon_location := imsearch.search_img_in_rect(path.joinpath(f"{image_name}.png"), self.win.minimap, 0.323):
             if click:
-                self.log_msg(f"Clicking {image_name}...") 
+                self.log_msg(f"Clicking {image_name}...")
                 self.mouse.move_to(icon_location.random_point())
                 self.mouse.click()
             return True
         else:
             return False
-        
+
     def click_game_view_icon(self, image_name: str, path: str):
         self.log_msg(f"Clicking {image_name}...")
         if icon_location := imsearch.search_img_in_rect(path.joinpath(f"{image_name}.png"), self.win.game_view, 0.323):
-            self.mouse.move_to(icon_location.random_point(), mouseSpeed = "fast")
+            self.mouse.move_to(icon_location.random_point(), mouseSpeed="fast")
             self.mouse.click()
             return True
         else:
-            return False  
-    
+            return False
+
     def gameview_text_orange(self, contains: str = None) -> Union[bool, str]:
         if contains is None:
-            return ocr.extract_text(self.win.game_view, ocr.PLAIN_12, [ clr.ORANGE, clr.OFF_ORANGE ])
-        if ocr.find_text(contains, self.win.game_view, ocr.PLAIN_12, [ clr.ORANGE, clr.OFF_ORANGE ]):
+            return ocr.extract_text(self.win.game_view, ocr.PLAIN_12, [clr.ORANGE, clr.OFF_ORANGE])
+        if ocr.find_text(contains, self.win.game_view, ocr.PLAIN_12, [clr.ORANGE, clr.OFF_ORANGE]):
             return True
-        
+
     def get_raid_layout(self):
         fonts = [ocr.PLAIN_11, ocr.PLAIN_12, ocr.BOLD_12]
         for font in fonts:
-            text = ocr.extract_text(self.win.game_view, font, [ clr.WHITE, clr.OFF_WHITE ])
+            text = ocr.extract_text(self.win.game_view, font, [clr.WHITE, clr.OFF_WHITE])
             if text.count("Puzzle") > 0:
                 return text
-        
+
     def gameview_runelite_text_white(self, contains: str = None) -> Union[bool, str]:
         if contains is None:
-            return ocr.extract_text(self.win.game_view, ocr.PLAIN_12, [ clr.WHITE, clr.OFF_WHITE ])
-        if ocr.find_text(contains, self.win.game_view, ocr.PLAIN_12, [ clr.WHITE, clr.OFF_WHITE ]):
+            return ocr.extract_text(self.win.game_view, ocr.PLAIN_12, [clr.WHITE, clr.OFF_WHITE])
+        if ocr.find_text(contains, self.win.game_view, ocr.PLAIN_12, [clr.WHITE, clr.OFF_WHITE]):
             return True
-    
+
+    def __move_mouse_to_nearest_tagged(self, next_nearest=False, color=clr.PINK):
+        options = self.get_all_tagged_in_rect(self.win.game_view, color)
+        option = None
+        if not options:
+            return False
+        # If we are looking for the next nearest option, we need to make sure options has at least 2 elements
+        if next_nearest and len(options) < 2:
+            return False
+        options = sorted(options, key=RuneLiteObject.distance_from_rect_center)
+        option = options[1] if next_nearest else options[0]
+        if next_nearest:
+            self.mouse.move_to(option.random_point(), knotsCount=2)
+        else:
+            self.mouse.move_to(option.random_point())
+        return True
+
     def type_layout(self):
         msg = "!layout"
         for key in msg:
-            self.keypress(key, random.uniform(.1, .2))
-        self.keypress("enter", random.uniform(.1, .2))
-            
-    
+            self.keypress(key, random.uniform(0.1, 0.2))
+        self.keypress("enter", random.uniform(0.1, 0.2))
+
+    def type_chat_message(self, message: str):
+        for key in message:
+            self.keypress(key, random.uniform(0.05, 0.1))
+        self.keypress("enter", random.uniform(0.05, 0.1))
+
     def keypress(self, direction, duration):
         pag.keyDown(direction)
         time.sleep(duration)

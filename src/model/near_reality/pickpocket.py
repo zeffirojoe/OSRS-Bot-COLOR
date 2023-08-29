@@ -86,22 +86,17 @@ class NRPickpocket(NRBot):
                 return
         self.options_set = True
 
-    def main_loop(self):  # sourcery skip: low-code-quality, use-named-expression
+    def main_loop(self):
         # Setup
         api = StatusSocket()
-
         self.mouse.click_delay = False
-
         coin_pouch_path = imsearch.BOT_IMAGES.joinpath("items", "coin_pouch.png")
+        inventory_full = False
+        pouch_found_count = 0
 
         self.log_msg("Selecting inventory...")
         self.mouse.move_to(self.win.cp_tabs[3].random_point())
         self.mouse.click()
-
-        # Anchors/counters
-        npc_search_fail_count = 0
-        theft_count = 0
-        no_pouch_count = 0
 
         # Main loop
         start_time = time.time()
@@ -110,46 +105,42 @@ class NRPickpocket(NRBot):
             # Check if we should eat
             while self.get_hp() < 50:
                 food_indexes = api.get_inv_item_indices(item_ids.all_food)
-                if food_indexes:
+                if not food_indexes:
+                    self.__logout(f"Out of food. Bot ran for {(time.time() - start_time) / 60} minutes.")
+                else:
                     self.log_msg("Eating...")
                     self.mouse.move_to(self.win.inventory_slots[food_indexes[0]].random_point())
                     self.mouse.click()
-                    if len(food_indexes) > 1:  # eat another if available
+                    if len(food_indexes) > 1:
                         time.sleep(1)
                         self.mouse.move_to(self.win.inventory_slots[food_indexes[1]].random_point())
                         self.mouse.click()
-                else:
-                    self.__logout(f"Out of food. Bot ran for {(time.time() - start_time) / 60} minutes.")
 
             # Check if we should drop inventory
-            if self.should_drop_inv and api.get_is_inv_full():
-                skip_slots = api.get_inv_item_indices(item_ids.all_food)
-                # Always drop the last row
-                remove = range(24, 28)
-                for index in remove:
-                    if index in skip_slots:
-                        skip_slots.remove(index)
-                self.drop_all(skip_rows=self.protect_rows, skip_slots=skip_slots)
+            if self.should_drop_inv and not inventory_full:
+                inventory_full = api.get_is_inv_full()
+                if inventory_full:
+                    skip_slots = api.get_inv_item_indices(item_ids.all_food)
+                    skip_slots.extend(range(24, 28))  # Always drop the last row
+                    self.drop_all(skip_rows=self.protect_rows, skip_slots=skip_slots)
 
             # Steal from NPC
             npc_pos: RuneLiteObject = self.get_nearest_tag(clr.CYAN)
-            if npc_pos is not None:
+            if npc_pos:
                 self.mouse.move_to(npc_pos.random_point(), mouseSpeed="fastest")
-                if not self.mouseover_text(contains="option"):
+                if self.mouseover_text(contains="option"):
+                    if self.pickpocket_option != 0:
+                        self.mouse.right_click()
+                        delta_y = 41 if self.pickpocket_option == 1 else 56
+                        self.mouse.move_rel(x=5, y=delta_y, x_var=25, y_var=4, mouseSpeed="fastest")
+                    self.mouse.click()
+                    if self.pickpocket_option == 0:
+                        time.sleep(0.3)
+                    npc_search_fail_count = 0
+                    theft_count += 1
+                else:
                     # Recalculate position if not hovering over a clickable object/NPC
                     continue
-                if self.pickpocket_option != 0:
-                    self.mouse.right_click()
-                    if self.pickpocket_option == 1:
-                        delta_y = 41
-                    elif self.pickpocket_option == 2:
-                        delta_y = 56
-                    self.mouse.move_rel(x=5, y=delta_y, x_var=25, y_var=4, mouseSpeed="fastest")
-                self.mouse.click()
-                if self.pickpocket_option == 0:
-                    time.sleep(0.3)
-                npc_search_fail_count = 0
-                theft_count += 1
             else:
                 npc_search_fail_count += 1
                 time.sleep(1)
@@ -162,21 +153,17 @@ class NRPickpocket(NRBot):
                 self.log_msg("Clicking coin pouch...")
                 pouch = imsearch.search_img_in_rect(image=coin_pouch_path, rect=self.win.control_panel)
                 if pouch:
-                    self.mouse.move_to(
-                        pouch.random_point(),
-                        mouseSpeed="fast",
-                        tween=pytweening.easeInOutQuad,
-                    )
+                    self.mouse.move_to(pouch.random_point(), mouseSpeed="fast", tween=pytweening.easeInOutQuad)
                     self.mouse.click(force_delay=True)
                     time.sleep(0.1)
                     self.mouse.click(force_delay=True)
-                    no_pouch_count = 0
+                    pouch_found_count = 0
                 else:
-                    no_pouch_count += 1
-                    if no_pouch_count > 5:
+                    pouch_found_count += 1
+                    if pouch_found_count > 5:
                         self.log_msg("Could not find coin pouch...")
                         self.drop_all(skip_rows=self.protect_rows)
-                        no_pouch_count = 0
+                        pouch_found_count = 0
 
             # Check for mods
             if self.logout_on_friends and self.friends_nearby():
